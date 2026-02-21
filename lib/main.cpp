@@ -8,22 +8,22 @@ using namespace std;
 int main()
 {
 	string inputString;
-	while(inputString != "Quit"){
-		// 1. Specify the file path and create an input file stream object
-		string file_path = "CS-170-Project-2/bin/Data/test.txt";
-		ifstream file(file_path); //
+	while(true){
+		cout<<"Welcome to Pedro Chaidez\'s Feature Selection Algorithm!"<<endl
+				<<"Type in the name of the file to test (make sure all test files are in the Data folder as a txt file): ";
+		cin>>inputString;
+		cout<<endl<<endl;
 
-		// 2. Check if the file opened successfully
-		if (!file.is_open())
-		{
-			throw runtime_error("Error: Could not open the file.\n");
-		}
-
-		// 3. Read numbers from the file into a container (e.g., a vector)
+		// Access the file
+		string file_path = "lib/Data/"+inputString;
+		ifstream file(file_path);
+		if (!file.is_open()) throw runtime_error("Error: Could not open the file.\n");
+				
+		// Read numbers from the file into a container
 		vector<int> numbers;
 		int number;
 		while (file >> number)
-		{ //
+		{ 
 			numbers.push_back(number);
 		}
 
@@ -36,7 +36,13 @@ int main()
 		{
 			cout << n << endl;
 		}
+		cout<<"Finished search! The best feature subset is {___}, which has an accuracy of _%"<<endl
+				<<"Done with program? Type Quit"<<endl
+				<<"Anything else would restart it"<<endl
+				<<"Selection: ";
 		cin>>inputString;
+		cout<<endl<<endl;
+		if (inputString == "Quit") return 0;
 	}
 	return 0;
 }
