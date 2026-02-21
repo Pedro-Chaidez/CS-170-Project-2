@@ -12,5 +12,4 @@ _deps
 CMakeUserPresets.json
 Project Files
 *.exe
-lib/Data
 bin
