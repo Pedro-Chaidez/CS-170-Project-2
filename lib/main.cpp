@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <exception>
+#include "../Headers/algorithms.hpp"
 
 using namespace std;
 
@@ -20,8 +21,8 @@ int main()
 		if (!file.is_open()) throw runtime_error("Error: Could not open the file.\n");
 				
 		// Read numbers from the file into a container
-		vector<int> numbers;
-		int number;
+		vector<double> numbers;
+		double number;
 		while (file >> number)
 		{ 
 			numbers.push_back(number);
@@ -32,7 +33,7 @@ int main()
 
 		// 5. Use the numbers (e.g., print them)
 		cout << "Numbers read from file:" << endl;
-		for (int n : numbers)
+		for (double n : numbers)
 		{
 			cout << n << endl;
 		}
