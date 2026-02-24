@@ -12,7 +12,8 @@ int main()
 	string inputString;
 	while(true){
 		cout<<"Welcome to Pedro Chaidez\'s Feature Selection Algorithm!"<<endl
-				<<"Type in the name of the file to test (make sure all test files are in the Data folder as a txt file): ";
+				<<"Type in the name of the file to test "<<endl
+				<<"(make sure all test files are in the Data folder as a txt file): ";
 		cin>>inputString;
 		cout<<endl<<endl;
 
@@ -59,8 +60,7 @@ int main()
 				<<"2) Backward Elimination"<<endl
 				<<"Selection: ";
 		cin>>inputString;
-		cout << endl
-				 << endl
+		cout << endl << endl
 				 << "This dataset has " << colCount - 1 << " features (not including the class attribute), with " << rowCount << " instances." << endl
 				 << endl
 				 << "Running nearest neighbor with all " << colCount - 1 << " features, using \"leaving-one-out\" evaluation, I get an accuracy of " << 0 << '%' << endl
