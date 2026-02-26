@@ -13,3 +13,7 @@ CMakeUserPresets.json
 Project Files
 *.exe
 bin
+lib/Data/san1.txt
+lib/Data/san2.txt
+lib/Data/CS170_Large_DataSet__69.txt
+lib/Data/CS170_Small_DataSet__11.txt
