@@ -16,5 +16,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CORE_SOURCES ./lib/algorithms.cpp)
 
 # --- 4. EXECUTABLE: THE MAIN GAME ---
-#add_executable(main ./lib/main.cpp ${CORE_SOURCES})
-add_executable(SearchProgram ./lib/main.cpp)
+add_executable(SearchProgram ./lib/main.cpp ${CORE_SOURCES})
