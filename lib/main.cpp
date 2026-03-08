@@ -80,8 +80,20 @@ int main()
 				 << "This dataset has " << colCount - 1 << " features (not including the class attribute), with " << rowCount << " instances." << endl
 				 << endl;
 
-		// Display initial search info as per the requested format
-		cout << "Beginning search." << endl
+		// Calculate accuracy with all features
+		vector<int> all_features;
+		// Populate vector with all feature indices (1 to colCount - 1)
+		for (int i = 1; i < colCount; i++)
+		{
+			all_features.push_back(i);
+		}
+		double initial_accuracy = nn.cross_validation(data, all_features);
+
+		// Output the calculated accuracy as a percentage
+		cout << "Running nearest neighbor with all " << colCount - 1 << " features, using \"leaving-one-out\" " << endl
+				 << "evaluation, I get an accuracy of " << (initial_accuracy * 100.0) << "%" << endl
+				 << endl
+				 << "Beginning search." << endl
 				 << endl;
 
 		if (selection == FORWARD_SELECTION)
