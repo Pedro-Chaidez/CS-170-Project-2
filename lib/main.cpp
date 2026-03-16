@@ -1,7 +1,8 @@
-#include <iostream>	 //Input Output
-#include <fstream>	 //File Reading
-#include <vector>		 //Lists handling
-#include <sstream>	 //Need for parsing strings into numbers
+#include <iostream> //Input Output
+#include <fstream>	//File Reading
+#include <vector>		//Lists handling
+#include <sstream>	//Need for parsing strings into numbers
+#include <chrono>		// Added for timing the search
 #include "../Headers/algorithms.hpp"
 
 using namespace std;
@@ -17,7 +18,8 @@ int main()
 				 << "Type in the name of the file to test " << endl
 				 << "(make sure all test files are in the Data folder as a txt file): ";
 		cin >> inputString;
-		cout << endl << endl;
+		cout << endl
+				 << endl;
 
 		// Access the file
 		string file_path = "lib/Data/" + inputString;
@@ -96,11 +98,14 @@ int main()
 				 << "Beginning search." << endl
 				 << endl;
 
-		if (selection == FORWARD_SELECTION)
+		// Start the timer
+		auto start_time = chrono::high_resolution_clock::now();
+
+		if (selection == 1) // Assuming 1 maps to FORWARD_SELECTION
 		{
 			nn.NNForwardSelectionSearch(data);
 		}
-		else if (selection == BACKWARD_ELIMINATION)
+		else if (selection == 2) // Assuming 2 maps to BACKWARD_ELIMINATION
 		{
 			nn.NNBackwardEliminationSearch(data);
 		}
@@ -109,6 +114,14 @@ int main()
 			cout << "Invalid selection. Returning to start..." << endl;
 			continue;
 		}
+
+		// Stop the timer and calculate the duration
+		auto end_time = chrono::high_resolution_clock::now();
+		chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+		// Print the duration
+		cout << endl
+				 << "Search completed in " << elapsed_seconds.count() << " seconds." << endl;
 
 		cout << endl
 				 << "Done with program? Type Quit" << endl

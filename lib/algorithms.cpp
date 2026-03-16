@@ -3,6 +3,8 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -56,6 +58,14 @@ double NearestNeighborAlgorithm::cross_validation(const vector<vector<double>> &
 
 void NearestNeighborAlgorithm::NNForwardSelectionSearch(const vector<vector<double>> &data)
 {
+	ofstream outFile;
+	outFile.open("forward_selection_results.txt");
+
+	if (!outFile.is_open())
+	{
+		cerr << "Error: Could not open forward_selection_results.txt for writing." << endl;
+	}
+
 	vector<int> current_set_of_features;
 	vector<int> best_overall_features;
 	double best_overall_accuracy = 0.0;
@@ -76,12 +86,21 @@ void NearestNeighborAlgorithm::NNForwardSelectionSearch(const vector<vector<doub
 
 				double accuracy = cross_validation(data, test_features);
 
-				cout << "\tUsing feature(s) {";
+				// Format the current features as a string {1,2,3...}
+				string features_str = "{";
 				for (size_t f = 0; f < test_features.size(); f++)
 				{
-					cout << test_features[f] << (f == test_features.size() - 1 ? "" : ",");
+					features_str += to_string(test_features[f]) + (f == test_features.size() - 1 ? "" : ",");
 				}
-				cout << "} accuracy is " << (accuracy * 100.0) << "%" << endl;
+				features_str += "}";
+
+				// Export to text file
+				if (outFile.is_open())
+				{
+					outFile << features_str << " " << accuracy << "\n";
+				}
+
+				cout << "\tUsing feature(s) " << features_str << " accuracy is " << (accuracy * 100.0) << "%" << endl;
 
 				if (accuracy > best_so_far_accuracy)
 				{
@@ -117,6 +136,11 @@ void NearestNeighborAlgorithm::NNForwardSelectionSearch(const vector<vector<doub
 		}
 	}
 
+	if (outFile.is_open())
+	{
+		outFile.close();
+	}
+
 	cout << "Finished search!! The best feature subset is {";
 	for (size_t f = 0; f < best_overall_features.size(); f++)
 	{
@@ -127,6 +151,14 @@ void NearestNeighborAlgorithm::NNForwardSelectionSearch(const vector<vector<doub
 
 void NearestNeighborAlgorithm::NNBackwardEliminationSearch(const vector<vector<double>> &data)
 {
+	ofstream outFile;
+	outFile.open("backward_elimination_results.txt");
+
+	if (!outFile.is_open())
+	{
+		cerr << "Error: Could not open backward_elimination_results.txt for writing." << endl;
+	}
+
 	int number_of_features = data.empty() ? 0 : data[0].size() - 1;
 	vector<int> current_set_of_features;
 
@@ -135,6 +167,20 @@ void NearestNeighborAlgorithm::NNBackwardEliminationSearch(const vector<vector<d
 
 	// Evaluate initial set (all features)
 	double initial_accuracy = cross_validation(data, current_set_of_features);
+
+	// Format and output the initial all-feature set
+	string init_features_str = "{";
+	for (size_t f = 0; f < current_set_of_features.size(); f++)
+	{
+		init_features_str += to_string(current_set_of_features[f]) + (f == current_set_of_features.size() - 1 ? "" : ",");
+	}
+	init_features_str += "}";
+
+	if (outFile.is_open())
+	{
+		outFile << init_features_str << " " << initial_accuracy << "\n";
+	}
+
 	vector<int> best_overall_features = current_set_of_features;
 	double best_overall_accuracy = initial_accuracy;
 
@@ -153,12 +199,21 @@ void NearestNeighborAlgorithm::NNBackwardEliminationSearch(const vector<vector<d
 
 			double accuracy = cross_validation(data, test_features);
 
-			cout << "\tUsing feature(s) {";
+			// Format the current features as a string {1,2,3...}
+			string features_str = "{";
 			for (size_t f = 0; f < test_features.size(); f++)
 			{
-				cout << test_features[f] << (f == test_features.size() - 1 ? "" : ",");
+				features_str += to_string(test_features[f]) + (f == test_features.size() - 1 ? "" : ",");
 			}
-			cout << "} accuracy is " << (accuracy * 100.0) << "%" << endl;
+			features_str += "}";
+
+			// Export to text file
+			if (outFile.is_open())
+			{
+				outFile << features_str << " " << accuracy << "\n";
+			}
+
+			cout << "\tUsing feature(s) " << features_str << " accuracy is " << (accuracy * 100.0) << "%" << endl;
 
 			if (accuracy > best_so_far_accuracy)
 			{
@@ -191,6 +246,11 @@ void NearestNeighborAlgorithm::NNBackwardEliminationSearch(const vector<vector<d
 			cout << "} was best, accuracy is " << (best_so_far_accuracy * 100.0) << "%" << endl
 					 << endl;
 		}
+	}
+
+	if (outFile.is_open())
+	{
+		outFile.close();
 	}
 
 	cout << "Finished search!! The best feature subset is {";
