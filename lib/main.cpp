@@ -79,8 +79,7 @@ int main()
 
 		cout << endl
 				 << endl
-				 << "This dataset has " << colCount - 1 << " features (not including the class attribute), with " << rowCount << " instances." << endl
-				 << endl;
+				 << "This dataset has " << colCount - 1 << " features (not including the class attribute), with " << rowCount << " instances." << endl;
 
 		// Calculate accuracy with all features
 		vector<int> all_features;
