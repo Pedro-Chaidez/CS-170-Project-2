@@ -82,7 +82,6 @@ int main()
 
 		// Calculate accuracy with all features
 		vector<int> all_features;
-		// Populate vector with all feature indices (1 to colCount - 1)
 		for (int i = 1; i < colCount; i++)
 		{
 			all_features.push_back(i);
