@@ -6,11 +6,10 @@
 
 using namespace std;
 
-// Helper function to calculate Euclidean distance based on a subset of features
-double NearestNeighborAlgorithm::calculate_distance(const vector<double> &instance1, const vector<double> &instance2, const vector<int> &features_to_use)
+double NearestNeighborAlgorithm::CalculateDistance(const vector<double> &instance1, const vector<double> &instance2, const vector<int> &featuresToUse)
 {
 	double distance = 0.0;
-	for (int feature : features_to_use)
+	for (int feature : featuresToUse)
 	{
 		// Assuming the class label is at index 0, features start at index 1
 		double diff = instance1[feature] - instance2[feature];
@@ -19,86 +18,93 @@ double NearestNeighborAlgorithm::calculate_distance(const vector<double> &instan
 	return sqrt(distance);
 }
 
-// Helper function for Leave-One-Out Cross-Validation
-double NearestNeighborAlgorithm::cross_validation(const vector<vector<double>> &data, const vector<int> &current_set_of_features)
+double NearestNeighborAlgorithm::CrossValidation(
+		const vector<vector<double>> &data,
+		const vector<int> &currentSetOfFeatures)
 {
-	if (current_set_of_features.empty())
+	// Prevent divide-by-zero if no features are provided
+	if (currentSetOfFeatures.empty())
 		return 0.0;
 
-	int correct_predictions = 0;
+	int correctPredictions = 0;
 
-	for (size_t i = 0; i < data.size(); ++i)
+	// Leave-One-Out Cross-Validation (LOOCV)
+	for (unsigned int i = 0; i < data.size(); ++i)
 	{
-		double nearest_neighbor_distance = INFINITE;
-		double nearest_neighbor_label = -1;
+		double nearestNeighborDistance = INFINITE;
+		double nearestNeighborLabel = -1;
 
-		for (size_t j = 0; j < data.size(); ++j)
+		// Find the nearest neighbor for the held-out instance 'i'
+		for (unsigned int j = 0; j < data.size(); ++j)
 		{
 			if (i == j)
 				continue; // Don't compare the object to itself
 
-			double distance = calculate_distance(data[i], data[j], current_set_of_features);
-			if (distance < nearest_neighbor_distance)
+			double distance = CalculateDistance(data[i], data[j], currentSetOfFeatures);
+			if (distance < nearestNeighborDistance)
 			{
-				nearest_neighbor_distance = distance;
-				nearest_neighbor_label = data[j][0]; // Class label of the nearest neighbor
+				nearestNeighborDistance = distance;
+				nearestNeighborLabel = data[j][0];
 			}
 		}
 
-		if (nearest_neighbor_label == data[i][0])
+		if (nearestNeighborLabel == data[i][0])
 		{
-			correct_predictions++;
+			correctPredictions++;
 		}
 	}
 
-	return (double)correct_predictions / data.size();
+	return (double)correctPredictions / data.size();
 }
 
 void NearestNeighborAlgorithm::NNForwardSelectionSearch(const vector<vector<double>> &data)
 {
-	vector<int> current_set_of_features;
-	vector<int> best_overall_features;
-	double best_overall_accuracy = 0.0;
-	int number_of_features = data.empty() ? 0 : data[0].size() - 1;
+	vector<int> currentSetOfFeatures;
+	vector<int> bestOverallFeatures;
+	double bestOverallAccuracy = 0.0;
+	// Number of features (excluding the class label)
+	int numberOfFeatures = data.empty() ? 0 : (int)data[0].size() - 1;
 
-	for (int i = 1; i <= number_of_features; i++)
+	for (int i = 1; i <= numberOfFeatures; i++)
 	{
-		int feature_to_add_at_this_level = -1;
-		double best_so_far_accuracy = -1.0;
+		int featureToAddAtThisLevel = -1;
+		double bestSoFarAccuracy = -1.0;
 
-		for (int k = 1; k <= number_of_features; k++)
+		// Evaluate all unselected features to find the best addition
+		for (int k = 1; k <= numberOfFeatures; k++)
 		{
-			// If feature k is NOT already in current_set_of_features
-			if (find(current_set_of_features.begin(), current_set_of_features.end(), k) == current_set_of_features.end())
+			// Only test features not already in the current set
+			if (find(currentSetOfFeatures.begin(), currentSetOfFeatures.end(), k) == currentSetOfFeatures.end())
 			{
-				vector<int> test_features = current_set_of_features;
-				test_features.push_back(k);
+				vector<int> testFeatures = currentSetOfFeatures;
+				testFeatures.push_back(k);
 
-				double accuracy = cross_validation(data, test_features);
+				double accuracy = CrossValidation(data, testFeatures);
 
 				cout << "\tUsing feature(s) {";
-				for (size_t f = 0; f < test_features.size(); f++)
+				for (unsigned int f = 0; f < testFeatures.size(); f++)
 				{
-					cout << test_features[f] << (f == test_features.size() - 1 ? "" : ",");
+					cout << testFeatures[f] << (f == testFeatures.size() - 1 ? "" : ",");
 				}
 				cout << "} accuracy is " << (accuracy * 100.0) << "%" << endl;
 
-				if (accuracy > best_so_far_accuracy)
+				if (accuracy > bestSoFarAccuracy)
 				{
-					best_so_far_accuracy = accuracy;
-					feature_to_add_at_this_level = k;
+					bestSoFarAccuracy = accuracy;
+					featureToAddAtThisLevel = k;
 				}
 			}
 		}
 
-		if (feature_to_add_at_this_level != -1)
+		if (featureToAddAtThisLevel != -1)
 		{
-			current_set_of_features.push_back(feature_to_add_at_this_level);
+			currentSetOfFeatures.push_back(featureToAddAtThisLevel);
 
-			if (best_so_far_accuracy > best_overall_accuracy)
+			// Track overall peak performance
+			if (bestSoFarAccuracy > bestOverallAccuracy)
 			{
-				best_overall_accuracy = best_so_far_accuracy;
-				best_overall_features = current_set_of_features;
+				bestOverallAccuracy = bestSoFarAccuracy;
+				bestOverallFeatures = currentSetOfFeatures;
 			}
 			else
 			{
@@ -108,73 +114,77 @@ void NearestNeighborAlgorithm::NNForwardSelectionSearch(const vector<vector<doub
 
 			cout << endl
 					 << "Feature set {";
-			for (size_t f = 0; f < current_set_of_features.size(); f++)
+			for (unsigned int f = 0; f < currentSetOfFeatures.size(); f++)
 			{
-				cout << current_set_of_features[f] << (f == current_set_of_features.size() - 1 ? "" : ",");
+				cout << currentSetOfFeatures[f] << (f == currentSetOfFeatures.size() - 1 ? "" : ",");
 			}
-			cout << "} was best, accuracy is " << (best_so_far_accuracy * 100.0) << "%" << endl
+			cout << "} was best, accuracy is " << (bestSoFarAccuracy * 100.0) << "%" << endl
 					 << endl;
 		}
 	}
 
 	cout << "Finished search!! The best feature subset is {";
-	for (size_t f = 0; f < best_overall_features.size(); f++)
+	for (unsigned int f = 0; f < bestOverallFeatures.size(); f++)
 	{
-		cout << best_overall_features[f] << (f == best_overall_features.size() - 1 ? "" : ",");
+		cout << bestOverallFeatures[f] << (f == bestOverallFeatures.size() - 1 ? "" : ",");
 	}
-	cout << "}, which has an accuracy of " << (best_overall_accuracy * 100.0) << "%" << endl;
+	cout << "}, which has an accuracy of " << (bestOverallAccuracy * 100.0) << "%" << endl;
 }
 
 void NearestNeighborAlgorithm::NNBackwardEliminationSearch(const vector<vector<double>> &data)
 {
-	int number_of_features = data.empty() ? 0 : data[0].size() - 1;
-	vector<int> current_set_of_features;
+	int numberOfFeatures = data.empty() ? 0 : (int)data[0].size() - 1;
+	vector<int> currentSetOfFeatures;
 
-	for (int i = 1; i <= number_of_features; i++)
-		current_set_of_features.push_back(i);
+	for (int i = 1; i <= numberOfFeatures; i++)
+		currentSetOfFeatures.push_back(i);
 
-	// Evaluate initial set (all features)
-	double initial_accuracy = cross_validation(data, current_set_of_features);
-	vector<int> best_overall_features = current_set_of_features;
-	double best_overall_accuracy = initial_accuracy;
+	// Establish baseline accuracy using all features
+	double initialAccuracy = CrossValidation(data, currentSetOfFeatures);
+	vector<int> bestOverallFeatures = currentSetOfFeatures;
+	double bestOverallAccuracy = initialAccuracy;
 
-	cout << "Initial set {all features} accuracy: " << (initial_accuracy * 100.0) << "%" << endl
+	cout << "Initial set {all features} accuracy: " << (initialAccuracy * 100.0) << "%" << endl
 			 << endl;
 
-	for (int i = 1; i < number_of_features; i++)
+	for (int i = 1; i < numberOfFeatures; i++)
 	{
-		int feature_to_remove_at_this_level = -1;
-		double best_so_far_accuracy = -1.0;
+		int featureToRemoveAtThisLevel = -1;
+		double bestSoFarAccuracy = -1.0;
 
-		for (int k : current_set_of_features)
+		// Evaluate the removal of each current feature
+		for (int k : currentSetOfFeatures)
 		{
-			vector<int> test_features = current_set_of_features;
-			test_features.erase(remove(test_features.begin(), test_features.end(), k), test_features.end());
+			vector<int> testFeatures = currentSetOfFeatures;
+			testFeatures.erase(remove(testFeatures.begin(), testFeatures.end(), k), testFeatures.end());
 
-			double accuracy = cross_validation(data, test_features);
+			double accuracy = CrossValidation(data, testFeatures);
 
 			cout << "\tUsing feature(s) {";
-			for (size_t f = 0; f < test_features.size(); f++)
+			for (unsigned int f = 0; f < testFeatures.size(); f++)
 			{
-				cout << test_features[f] << (f == test_features.size() - 1 ? "" : ",");
+				cout << testFeatures[f] << (f == testFeatures.size() - 1 ? "" : ",");
 			}
 			cout << "} accuracy is " << (accuracy * 100.0) << "%" << endl;
 
-			if (accuracy > best_so_far_accuracy)
+			if (accuracy > bestSoFarAccuracy)
 			{
-				best_so_far_accuracy = accuracy;
-				feature_to_remove_at_this_level = k;
+				bestSoFarAccuracy = accuracy;
+				featureToRemoveAtThisLevel = k;
 			}
 		}
 
-		if (feature_to_remove_at_this_level != -1)
+		if (featureToRemoveAtThisLevel != -1)
 		{
-			current_set_of_features.erase(remove(current_set_of_features.begin(), current_set_of_features.end(), feature_to_remove_at_this_level), current_set_of_features.end());
+			// Remove the selected feature from the working set
+			currentSetOfFeatures.erase(
+					remove(currentSetOfFeatures.begin(), currentSetOfFeatures.end(), featureToRemoveAtThisLevel),
+					currentSetOfFeatures.end());
 
-			if (best_so_far_accuracy > best_overall_accuracy)
+			if (bestSoFarAccuracy > bestOverallAccuracy)
 			{
-				best_overall_accuracy = best_so_far_accuracy;
-				best_overall_features = current_set_of_features;
+				bestOverallAccuracy = bestSoFarAccuracy;
+				bestOverallFeatures = currentSetOfFeatures;
 			}
 			else
 			{
@@ -184,43 +194,53 @@ void NearestNeighborAlgorithm::NNBackwardEliminationSearch(const vector<vector<d
 
 			cout << endl
 					 << "Feature set {";
-			for (size_t f = 0; f < current_set_of_features.size(); f++)
+			for (unsigned int f = 0; f < currentSetOfFeatures.size(); f++)
 			{
-				cout << current_set_of_features[f] << (f == current_set_of_features.size() - 1 ? "" : ",");
+				cout << currentSetOfFeatures[f] << (f == currentSetOfFeatures.size() - 1 ? "" : ",");
 			}
-			cout << "} was best, accuracy is " << (best_so_far_accuracy * 100.0) << "%" << endl
+			cout << "} was best, accuracy is " << (bestSoFarAccuracy * 100.0) << "%" << endl
 					 << endl;
 		}
 	}
 
 	cout << "Finished search!! The best feature subset is {";
-	for (size_t f = 0; f < best_overall_features.size(); f++)
+	for (unsigned int f = 0; f < bestOverallFeatures.size(); f++)
 	{
-		cout << best_overall_features[f] << (f == best_overall_features.size() - 1 ? "" : ",");
+		cout << bestOverallFeatures[f] << (f == bestOverallFeatures.size() - 1 ? "" : ",");
 	}
-	cout << "}, which has an accuracy of " << (best_overall_accuracy * 100.0) << "%" << endl;
+	cout << "}, which has an accuracy of " << (bestOverallAccuracy * 100.0) << "%" << endl;
 }
 
-void NearestNeighborAlgorithm::KNNSearch(const unsigned int object_to_classify_idx, const vector<vector<double>> &data)
+void NearestNeighborAlgorithm::KNNSearch(
+		const unsigned int objectToClassifyIdx,
+		const vector<vector<double>> &data)
 {
 	nnDistance = INFINITE;
 	nnLocation = -1;
 	nnLabel = -1;
-	if (object_to_classify_idx >= data.size())
+
+	// Bounds checking
+	if (objectToClassifyIdx >= data.size())
 		return;
-	vector<double> object_to_classify = data[object_to_classify_idx];
-	vector<int> all_features;
-	for (size_t i = 1; i < object_to_classify.size(); i++)
-		all_features.push_back(i);
-	for (size_t k = 0; k < data.size(); ++k)
+
+	vector<double> objectToClassify = data[objectToClassifyIdx];
+
+	// Extract all valid feature indices (skipping class label at 0)
+	vector<int> allFeatures;
+	for (unsigned int i = 1; i < objectToClassify.size(); i++)
+		allFeatures.push_back((int)i);
+
+	// Find nearest neighbor
+	for (unsigned int k = 0; k < data.size(); ++k)
 	{
-		if (k != object_to_classify_idx)
+		if (k != objectToClassifyIdx) // Skip self-comparison
 		{
-			double distance = calculate_distance(object_to_classify, data[k], all_features);
+			double distance = CalculateDistance(objectToClassify, data[k], allFeatures);
+
 			if (distance < nnDistance)
 			{
 				nnDistance = distance;
-				nnLocation = k;
+				nnLocation = (double)k;
 				nnLabel = data[k][0];
 			}
 		}
