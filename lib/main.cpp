@@ -86,7 +86,7 @@ int main()
 		{
 			all_features.push_back(i);
 		}
-		double initial_accuracy = nn.cross_validation(data, all_features);
+		double initial_accuracy = nn.CrossValidation(data, all_features);
 
 		// Output the calculated accuracy as a percentage
 		cout << "Running nearest neighbor with all " << colCount - 1 << " features, using \"leaving-one-out\" " << endl
